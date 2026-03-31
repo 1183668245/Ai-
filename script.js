@@ -1,5 +1,5 @@
 const CONTRACT_ADDRESS = "0xf2410Eb96929dBD6735042C38fE4d08077107D77";
-const RPC_URL = "https://bsc-dataseed.binance.org/";
+const RPC_URL = "https://binance.llamarpc.com";
 
  
 function initCanvas() {
@@ -61,13 +61,12 @@ async function fetchRealData() {
         const balance = await tempProvider.getBalance(CONTRACT_ADDRESS);
         const balanceBNB = ethers.formatEther(balance);
         
-        document.getElementById('contractBalance').innerHTML = `${parseFloat(balanceBNB).toFixed(4)} <small>BNB</small>`;
-        
-         
-         
-        addLog(`Real-time sync: Contract balance is ${balanceBNB} BNB`, "system");
+        const balanceElement = document.getElementById('contractBalance');
+        if (balanceElement) {
+            balanceElement.innerHTML = `${parseFloat(balanceBNB).toFixed(4)} <small>BNB</small>`;
+        }
     } catch (error) {
-        console.error("Fetch error:", error);
+        console.error("BSC Sync error");
     }
 }
 
@@ -83,27 +82,26 @@ function addLog(message, type = 'system') {
     terminal.scrollTop = terminal.scrollHeight;
 }
 
- 
+// 获取真实日志
 async function fetchRealLogs() {
     try {
-        const response = await fetch('http://localhost:3000/api/logs');
+        const response = await fetch('https://api.aigenie.one/api/logs');
+        if (!response.ok) return;
         const logs = await response.json();
         
         const terminal = document.getElementById('terminalBody');
         if (!terminal) return;
         
-         
-         
         terminal.innerHTML = "";
         logs.forEach(log => {
             const entry = document.createElement('div');
             entry.className = `log-entry ${log.type}`;
-            entry.innerHTML = `<span style="color: #4b5563; margin-right: 10px;">${log.time}</span> ${log.msg}`;
+            entry.innerHTML = `${log.msg}`;
             terminal.appendChild(entry);
         });
         terminal.scrollTop = terminal.scrollHeight;
     } catch (error) {
-        console.error("Fetch logs error:", error);
+        // Silently handle log fetch errors
     }
 }
 
@@ -182,29 +180,40 @@ if (chatToggle && chatWindow && closeChat) {
 const chatInput = document.getElementById('chat-input');
 const sendChat = document.getElementById('send-chat');
 const chatMessages = document.getElementById('chat-messages');
+let chatHistory = []; // 用于存储对话历史
 
 async function sendMessage() {
     const text = chatInput.value.trim();
     if (!text) return;
 
-     
+    // 1. 显示用户消息
     appendMessage(text, 'user');
     chatInput.value = '';
+    
+    // 保存到历史记录
+    chatHistory.push({ role: "user", content: text });
+    if (chatHistory.length > 10) chatHistory.shift(); // 只保留最近10条
 
-     
+    // 2. 显示等待状态
     const loadingId = 'loading-' + Date.now();
     appendMessage('AI精灵正在思考...', 'bot', loadingId);
 
     try {
-         
-        const response = await fetch('http://localhost:3000/api/chat', {
+        // 发送给后端生产环境 API
+        const response = await fetch('https://api.aigenie.one/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text })
+            body: JSON.stringify({ 
+                message: text,
+                history: chatHistory
+            })
         });
         const data = await response.json();
         
-         
+        // 保存 AI 回复到历史
+        chatHistory.push({ role: "assistant", content: data.reply });
+        
+        // 4. 打字机效果更新 AI 回复
         const loadingDiv = document.getElementById(loadingId);
         loadingDiv.innerText = "";  
         await typeMessage(loadingDiv, data.reply);
