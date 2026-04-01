@@ -1,7 +1,16 @@
 require('dotenv').config();
+
+// 全局错误捕获：防止程序崩溃不留日志
+process.on('uncaughtException', (err) => {
+    console.error('🔴 发现未捕获异常:', err.message);
+    console.error(err.stack);
+});
+
 console.log("==========================================");
 console.log("   AI GENIE AGENT IS STARTING UP...      ");
+console.log("   TIME: " + new Date().toLocaleString());
 console.log("==========================================");
+
 const { ethers } = require('ethers');
 const axios = require('axios');
 const express = require('express');
@@ -9,18 +18,16 @@ const cors = require('cors');
 
 const app = express();
 
-// 终极 CORS 修复方案：允许所有来源，处理所有预检请求
-app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    preflightContinue: false,
-    optionsSuccessStatus: 204
-}));
-
+// 极致 CORS 允许
+app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json());
 
- 
+// 变量检查日志
+console.log("[INIT] 检查环境变量...");
+console.log("- RPC_URL:", process.env.RPC_URL ? "已配置" : "❌ 未配置");
+console.log("- PRIVATE_KEY:", process.env.AGENT_PRIVATE_KEY ? "已配置" : "❌ 未配置");
+console.log("- CONTRACT:", process.env.CONTRACT_ADDRESS ? "已配置" : "❌ 未配置");
+
 const RPC_URL = process.env.RPC_URL;
 const PRIVATE_KEY = process.env.AGENT_PRIVATE_KEY;
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
@@ -37,7 +44,7 @@ function addLiveLog(msg, type = 'system') {
 
  
 // 根路由健康检查
-app.get('/', (req, res) => res.send('AI GENIE API IS LIVE'));
+app.get('/', (req, res) => res.status(200).send('AI GENIE API IS LIVE'));
 
 app.get('/api/logs', (req, res) => res.json(liveLogs));
 
@@ -100,31 +107,31 @@ app.use((req, res) => {
 // 适配 Railway 生产环境端口
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[AI GENIE] 服务已启动`);
-    console.log(`- 监听端口: ${PORT}`);
-    console.log(`- 外部访问: https://api.aigenie.one`);
+    console.log(`✅ 服务启动成功！监听端口: ${PORT}`);
 });
 
- 
-const provider = new ethers.JsonRpcProvider(RPC_URL);
-const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-
-// 启动时检测网络连接
-async function testConnection() {
-    try {
-        const network = await provider.getNetwork();
-        console.log(`[AI GENIE] 区块链网络已连接: ChainID ${network.chainId}`);
-        addLiveLog(`Blockchain connected. ChainID: ${network.chainId}`, 'system');
-    } catch (err) {
-        console.error("[AI GENIE] 区块链连接失败:", err.message);
-        addLiveLog(`Blockchain connection failed: ${err.message}`, 'warning');
+// 延迟初始化区块链连接，防止启动时因变量缺失直接闪退
+let provider, wallet, genieContract;
+try {
+    if (RPC_URL && PRIVATE_KEY && CONTRACT_ADDRESS) {
+        provider = new ethers.JsonRpcProvider(RPC_URL);
+        wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+        const abi = ["function executeGenieAction() external", "function address(this).balance() view returns (uint256)"];
+        genieContract = new ethers.Contract(CONTRACT_ADDRESS, abi, wallet);
+        
+        // 检测连接
+        provider.getNetwork().then(network => {
+            console.log(`✅ 成功连接区块链: ChainID ${network.chainId}`);
+            addLiveLog(`Blockchain connected. ChainID: ${network.chainId}`, 'system');
+        }).catch(err => {
+            console.error("🔴 区块链连接验证失败:", err.message);
+        });
+    } else {
+        console.warn("⚠️ 环境变量缺失，区块链监控功能将无法运行");
     }
+} catch (e) {
+    console.error("🔴 初始化区块链连接失败:", e.message);
 }
-testConnection();
-
- 
-const abi = ["function executeGenieAction() external", "function address(this).balance() view returns (uint256)"];
-const genieContract = new ethers.Contract(CONTRACT_ADDRESS, abi, wallet);
 
 async function checkAndExecute() {
     try {
