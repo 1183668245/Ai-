@@ -1,9 +1,10 @@
 const CONTRACT_ADDRESS = "0xf2410Eb96929dBD6735042C38fE4d08077107D77";
 const RPC_URL = "https://bsc-dataseed1.binance.org"; // 使用官方备用节点，通常更稳定
 
- 
+// 背景 Canvas 动画：打造星尘微光感
 function initCanvas() {
     const canvas = document.getElementById('canvas-bg');
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let particles = [];
 
@@ -22,26 +23,47 @@ function initCanvas() {
         reset() {
             this.x = Math.random() * canvas.width;
             this.y = Math.random() * canvas.height;
-            this.size = Math.random() * 2;
-            this.speedX = (Math.random() - 0.5) * 0.5;
-            this.speedY = (Math.random() - 0.5) * 0.5;
-            this.opacity = Math.random() * 0.5;
+            // 粒子变得极其细小，像尘埃
+            this.size = Math.random() * 1.2;
+            this.speedX = (Math.random() - 0.5) * 0.15;
+            this.speedY = (Math.random() - 0.5) * 0.15;
+            this.opacity = Math.random() * 0.4;
+            this.fadeSpeed = Math.random() * 0.005 + 0.002;
+            this.isFadingIn = Math.random() > 0.5;
         }
         update() {
             this.x += this.speedX;
             this.y += this.speedY;
-            if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-            if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            
+            // 呼吸闪烁效果
+            if (this.isFadingIn) {
+                this.opacity += this.fadeSpeed;
+                if (this.opacity >= 0.5) this.isFadingIn = false;
+            } else {
+                this.opacity -= this.fadeSpeed;
+                if (this.opacity <= 0.1) this.isFadingIn = true;
+            }
+
+            if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                this.reset();
+            }
         }
         draw() {
-            ctx.fillStyle = `rgba(0, 242, 255, ${this.opacity})`;
+            // 中心汇聚，边缘消隐的视觉处理
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const dist = Math.sqrt((this.x - centerX)**2 + (this.y - centerY)**2);
+            const edgeFade = Math.max(0, 1 - dist / (canvas.width * 0.6));
+            
+            ctx.fillStyle = `rgba(0, 242, 255, ${this.opacity * edgeFade})`;
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
             ctx.fill();
         }
     }
 
-    for (let i = 0; i < 100; i++) particles.push(new Particle());
+    // 减少粒子数量，追求克制的高级感
+    for (let i = 0; i < 150; i++) particles.push(new Particle());
 
     function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
