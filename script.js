@@ -111,7 +111,7 @@ async function fetchRealLogs() {
             mode: 'cors',
             cache: 'no-cache'
         });
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) return;
         const logs = await response.json();
         
         const terminal = document.getElementById('terminalBody');
@@ -227,6 +227,8 @@ async function sendMessage() {
         // 发送给后端生产环境 API
         const response = await fetch('https://api.aigenie.one/api/chat', {
             method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 message: text,
