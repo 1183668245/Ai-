@@ -5,8 +5,21 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+
+// 强化 CORS 配置
+const corsOptions = {
+    origin: ['https://aigenie.one', 'https://www.aigenie.one', 'http://localhost:8000'],
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
+
+// 处理所有 OPTIONS 请求 (Preflight)
+app.options('*', cors(corsOptions));
 
  
 const RPC_URL = process.env.RPC_URL;
@@ -24,14 +37,16 @@ function addLiveLog(msg, type = 'system') {
 }
 
  
+// 根路由健康检查
+app.get('/', (req, res) => res.send('AI GENIE API IS LIVE'));
+
 app.get('/api/logs', (req, res) => res.json(liveLogs));
 
 app.post('/api/chat', async (req, res) => {
-    const { message } = req.body;
+    const { message, history } = req.body;
     try {
         console.log(`[AI GENIE] 收到用户消息: ${message}`);
         
-      
         let fullUrl = OPENAI_BASE_URL;
         if (!fullUrl.endsWith('/chat/completions')) {
             fullUrl = fullUrl.endsWith('/') ? `${fullUrl}chat/completions` : `${fullUrl}/chat/completions`;
@@ -39,21 +54,25 @@ app.post('/api/chat', async (req, res) => {
         
         console.log(`[AI GENIE] 正在请求 API 地址: ${fullUrl}`);
         
+        const messages = [
+            { 
+                role: "system", 
+                content: `你是一个名为 AI精灵 (AI GENIE) 的加密货币助手。
+                你的核心信息如下：
+                - 项目性质：全自动自治协议
+                - 智能合约地址：0xf2410Eb96929dBD6735042C38fE4d08077107D77
+                - 官方推特：https://x.com/AIGENIE_WEB3
+                - 税收分配：3% 买卖税收自动注入，其中 66% 用于 AI 自动回购销毁，33% 用于系统开发维护。
+                - 态度：友好、专业且带有赛博朋克感。如果用户询问合约或社交链接，请准确提供上述信息。`
+            },
+            ...(history || []),
+            { role: "user", content: message }
+        ];
+
         const response = await axios.post(fullUrl, {
             model: "gpt-3.5-turbo",
-            messages: [
-                { 
-                    role: "system", 
-                    content: `你是一个名为 AI精灵 (AI GENIE) 的加密货币助手。
-                    你的核心信息如下：
-                    - 项目性质：全自动自治协议
-                    - 智能合约地址：0xf2410Eb96929dBD6735042C38fE4d08077107D77
-                    - 官方推特：https://x.com/AIGENIE_WEB3
-                    - 税收分配：3% 买卖税收自动注入，其中 66% 用于 AI 自动回购销毁，33% 用于系统开发维护。
-                    - 态度：友好、专业且带有赛博朋克感。如果用户询问合约或社交链接，请准确提供上述信息。`
-                },
-                { role: "user", content: message }
-            ]
+            messages: messages,
+            temperature: 0.7
         }, {
             headers: { 
                 'Authorization': `Bearer ${OPENAI_API_KEY}`, 
@@ -73,11 +92,31 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
-app.listen(3000, () => console.log('[AI GENIE] 聊天服务运行在端口 3000'));
+// 捕获所有未定义的路由并返回 404 调试信息
+app.use((req, res) => {
+    console.log(`[AI GENIE] 未匹配的请求: ${req.method} ${req.url}`);
+    res.status(404).json({ error: "Route not found", path: req.url });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => console.log(`[AI GENIE] 服务运行在端口 ${PORT}`));
 
  
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+
+// 启动时检测网络连接
+async function testConnection() {
+    try {
+        const network = await provider.getNetwork();
+        console.log(`[AI GENIE] 区块链网络已连接: ChainID ${network.chainId}`);
+        addLiveLog(`Blockchain connected. ChainID: ${network.chainId}`, 'system');
+    } catch (err) {
+        console.error("[AI GENIE] 区块链连接失败:", err.message);
+        addLiveLog(`Blockchain connection failed: ${err.message}`, 'warning');
+    }
+}
+testConnection();
 
  
 const abi = ["function executeGenieAction() external", "function address(this).balance() view returns (uint256)"];
