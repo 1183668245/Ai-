@@ -6,20 +6,25 @@ const cors = require('cors');
 
 const app = express();
 
-// 强化 CORS 配置
-const corsOptions = {
-    origin: ['https://aigenie.one', 'https://www.aigenie.one', 'http://localhost:8000'],
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-    optionsSuccessStatus: 200
-};
+// 极简且强力的 CORS 配置
+app.use(cors({
+    origin: true, // 自动匹配请求来源域名
+    credentials: true
+}));
 
-app.use(cors(corsOptions));
+// 全局中间件：强制为所有响应添加 CORS 头（防止报错时丢失头信息）
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+});
+
 app.use(express.json());
-
-// 处理所有 OPTIONS 请求 (Preflight)
-app.options('*', cors(corsOptions));
 
  
 const RPC_URL = process.env.RPC_URL;
