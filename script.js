@@ -1,5 +1,5 @@
 const CONTRACT_ADDRESS = "0xf2410Eb96929dBD6735042C38fE4d08077107D77";
-const RPC_URL = "https://binance.llamarpc.com";
+const RPC_URL = "https://bsc-dataseed1.binance.org"; // 使用官方备用节点，通常更稳定
 
  
 function initCanvas() {
@@ -66,7 +66,7 @@ async function fetchRealData() {
             balanceElement.innerHTML = `${parseFloat(balanceBNB).toFixed(4)} <small>BNB</small>`;
         }
     } catch (error) {
-        console.error("BSC Sync error");
+        console.warn("BSC Node connection issue, retrying...");
     }
 }
 
@@ -85,12 +85,11 @@ function addLog(message, type = 'system') {
 // 获取真实日志
 async function fetchRealLogs() {
     try {
-        // 增加自动重试逻辑，应对 Railway 冷启动
-        const response = await fetch('https://api.aigenie.one/api/logs');
-        if (response.status === 404) {
-            console.warn("API 路由尚未就绪，请确保后端已成功部署并配置域名。");
-            return;
-        }
+        const response = await fetch('https://api.aigenie.one/api/logs', {
+            mode: 'cors',
+            cache: 'no-cache'
+        });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const logs = await response.json();
         
         const terminal = document.getElementById('terminalBody');
