@@ -102,8 +102,13 @@ app.use((req, res) => {
     res.status(404).json({ error: "Route not found", path: req.url });
 });
 
+// 适配 Railway 生产环境端口
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, '0.0.0.0', () => console.log(`[AI GENIE] 服务运行在端口 ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`[AI GENIE] 服务已启动`);
+    console.log(`- 监听端口: ${PORT}`);
+    console.log(`- 外部访问: https://api.aigenie.one`);
+});
 
  
 const provider = new ethers.JsonRpcProvider(RPC_URL);
