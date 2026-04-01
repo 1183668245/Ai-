@@ -85,8 +85,12 @@ function addLog(message, type = 'system') {
 // 获取真实日志
 async function fetchRealLogs() {
     try {
+        // 增加自动重试逻辑，应对 Railway 冷启动
         const response = await fetch('https://api.aigenie.one/api/logs');
-        if (!response.ok) return;
+        if (response.status === 404) {
+            console.warn("API 路由尚未就绪，请确保后端已成功部署并配置域名。");
+            return;
+        }
         const logs = await response.json();
         
         const terminal = document.getElementById('terminalBody');
