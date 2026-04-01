@@ -6,18 +6,17 @@ const cors = require('cors');
 
 const app = express();
 
-// 极简且强力的 CORS 配置
-app.use(cors({
-    origin: true, // 自动匹配请求来源域名
-    credentials: true
-}));
-
-// 全局中间件：强制为所有响应添加 CORS 头（防止报错时丢失头信息）
+// 生产环境超级兼容 CORS 配置
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    const origin = req.headers.origin;
+    // 允许所有来自 aigenie.one 及其子域的请求
+    if (origin && (origin.endsWith('aigenie.one') || origin.includes('localhost'))) {
+        res.header('Access-Control-Allow-Origin', origin);
+    }
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    
     if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
     }
