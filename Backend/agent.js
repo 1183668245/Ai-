@@ -1,4 +1,7 @@
 require('dotenv').config();
+console.log("==========================================");
+console.log("   AI GENIE AGENT IS STARTING UP...      ");
+console.log("==========================================");
 const { ethers } = require('ethers');
 const axios = require('axios');
 const express = require('express');
