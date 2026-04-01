@@ -98,7 +98,7 @@ app.use((req, res) => {
     res.status(404).json({ error: "Route not found", path: req.url });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, '0.0.0.0', () => console.log(`[AI GENIE] 服务运行在端口 ${PORT}`));
 
  
