@@ -107,7 +107,7 @@ function addLog(message, type = 'system') {
 // 获取真实日志
 async function fetchRealLogs() {
     try {
-        const response = await fetch('https://api.aigenie.one/api/logs', {
+        const response = await fetch('https://ai.aigenie.one/api/logs', {
             mode: 'cors',
             cache: 'no-cache'
         });
@@ -225,7 +225,7 @@ async function sendMessage() {
 
     try {
         // 发送给后端生产环境 API
-        const response = await fetch('https://api.aigenie.one/api/chat', {
+        const response = await fetch('https://ai.aigenie.one/api/chat', {
             method: 'POST',
             mode: 'cors',
             cache: 'no-cache',
