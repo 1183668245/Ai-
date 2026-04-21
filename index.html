@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI精灵 | 智能自治协议</title>
+    <link rel="canonical" href="https://aigenie.one/">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="stylesheet" href="style.css">
+     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+</head>
+<body class="cyber-theme">
+     
+    <div class="bg-container">
+        <canvas id="canvas-bg"></canvas>
+        <div class="grid-overlay"></div>
+        <div class="radial-glow"></div>
+    </div>
+
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-image">
+                    <img src="logo.png" alt="AI GENIE Logo">
+                </div>
+                <div class="logo-text">
+                    <span class="main">AI GENIE</span>
+                    <span class="sub">AI精灵协议</span>
+                </div>
+            </div>
+            <div class="nav-actions">
+                <div class="status-indicator">
+                    <span class="pulse-dot"></span>
+                    <span class="status-label">BSC MAINNET</span>
+                </div>
+                <button id="connectWallet" class="glass-btn">
+                    <i class="fas fa-wallet"></i> <span>CONNECT</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="ai-badge">
+                    <span class="glitch" data-text="AI GENIE PROTOCOL">AI GENIE PROTOCOL</span>
+                </div>
+                <h1 class="main-title">全自动 <span>智能自治</span> 核心</h1>
+                <p class="hero-desc">基于深度学习的 3% 税收自动分配系统：66% 自动回购销毁 / 33% 系统开发维护</p>
+                
+                <div class="stat-grid-hero">
+                    <div class="stat-card-v2">
+                        <div class="stat-label">合约库余额</div>
+                        <div class="stat-value" id="contractBalance">0.0000 <small>BNB</small></div>
+                        <div class="stat-sub" id="balanceDelta" style="font-size:0.78rem;color:#7dd3fc;opacity:.9;">波动: +0.00%</div>
+                        <div class="stat-chart"><div class="bar" style="width: 45%"></div></div>
+                    </div>
+                    <div class="stat-card-v2">
+                        <div class="stat-label">累计回购销毁</div>
+                        <div class="stat-value" id="totalBurned">0.00 <small>TOKEN</small></div>
+                        <div class="stat-sub" id="burnedDelta" style="font-size:0.78rem;color:#f9a8d4;opacity:.9;">速率: +0.00 TOKEN/min</div>
+                        <div class="stat-chart"><div class="bar highlight" style="width: 70%"></div></div>
+                    </div>
+                    <div class="stat-card-v2">
+                        <div class="stat-label">AI 决策状态</div>
+                        <div class="stat-value status-text" id="systemStatus">ACTIVE</div>
+                        <div class="stat-chart"><div class="bar pulse" style="width: 100%"></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+         
+        <section class="agent-core-section">
+            <div class="section-title">
+                <i class="fas fa-brain"></i>
+                <h2>AI GENIE 双驱动核心</h2>
+                <p>超越传统协议，实现全自动化的市值管理与社交运营</p>
+            </div>
+            <div class="agent-grid">
+                <div class="agent-card">
+                    <div class="agent-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3>AI 市值管理 Agent</h3>
+                    <p>基于深度强化学习，24/7 监控流动性与价格波动。自动执行 2% 税收的回购销毁策略，通过算法平滑波动，维持健康的代币通缩模型。</p>
+                    <ul class="agent-features">
+                        <li><i class="fas fa-check"></i> 智能回购时机计算</li>
+                        <li><i class="fas fa-check"></i> 流动性深度优化</li>
+                        <li><i class="fas fa-check"></i> 自动波段平衡逻辑</li>
+                    </ul>
+                </div>
+                <div class="agent-card highlight">
+                    <div class="agent-icon"><i class="fab fa-twitter"></i></div>
+                    <h3>AI 社交运营 Agent</h3>
+                    <p>内置 LLM 驱动的推特运营官。实时分析链上动态（如大额销毁、税收注入），自动生成并发布极具感染力的推文，实现与社区的零延迟互动。</p>
+                    <ul class="agent-features">
+                        <li><i class="fas fa-check"></i> 实时销毁报告发推</li>
+                        <li><i class="fas fa-check"></i> AI 情感化社区互动</li>
+                        <li><i class="fas fa-check"></i> 24h 自动化品牌营销</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <div class="layout-grid">
+            <section class="monitor-panel">
+                <div class="panel-header">
+                    <i class="fas fa-satellite-dish"></i>
+                    <h2>发射平台税收实时监控</h2>
+                </div>
+                <div class="monitor-body">
+                    <div class="tax-circle-container">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="bg" cx="50" cy="50" r="45"></circle>
+                            <circle class="prog" cx="50" cy="50" r="45"></circle>
+                        </svg>
+                        <div class="tax-center">
+                            <span class="num">3%</span>
+                            <span class="lab">TOTAL TAX</span>
+                        </div>
+                    </div>
+                    <div class="dist-info">
+                        <div class="dist-row">
+                            <span class="label">智能合约</span>
+                            <span class="value cyan" style="font-size: 0.7rem;">0xf241...7D77</span>
+                        </div>
+                        <div class="dist-row">
+                            <span class="label">AI 回购销毁</span>
+                            <span class="value cyan">66%</span>
+                        </div>
+                        <div class="dist-row">
+                            <span class="label">系统开发维护</span>
+                            <span class="value pink">33%</span>
+                        </div>
+                    </div>
+                    <div class="scan-line"></div>
+                </div>
+            </section>
+
+            <section class="terminal-panel-v2">
+                <div class="terminal-container">
+                    <div class="terminal-top">
+                        <div class="window-controls">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <div class="window-title">GENIE-CORE-EXECUTOR.log</div>
+                    </div>
+                    <div id="terminalBody" class="terminal-content">
+                         
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-info">
+                <div class="footer-logo">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                    <span>AI GENIE</span>
+                </div>
+                <p class="disclaimer">
+                    免责声明：AI精灵 (AI GENIE) 是一个去中心化的自治实验协议。加密货币投资具有极高风险，本系统通过 AI 逻辑自动执行，不构成任何投资建议。参与即代表您已了解并接受相关技术风险。
+                </p>
+            </div>
+            <div class="footer-links">
+                <div class="link-group">
+                    <h4>SOCIALS</h4>
+                    <div class="social-icons">
+                        <a href="https://x.com/AIGENIE_WEB3" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="https://t.me/AIGENIEPROTOCOL" target="_blank" title="Telegram"><i class="fab fa-telegram"></i></a>
+                        <a href="#" target="_blank" title="Discord"><i class="fab fa-discord"></i></a>
+                    </div>
+                </div>
+                <div class="link-group">
+                    <h4>DEVELOPMENT</h4>
+                    <a href="https://github.com" target="_blank" class="github-link">
+                        <i class="fab fa-github"></i> VIEW ON GITHUB
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 AI GENIE PROTOCOL. ALL RIGHTS RESERVED.</p>
+        </div>
+    </footer>
+
+     
+    <div id="ai-chat-widget" class="chat-widget">
+        <div id="chat-window" class="chat-window hidden">
+            <div class="chat-header">
+                <i class="fas fa-wand-magic-sparkles"></i>
+                <span>精灵助手 (AI Genie)</span>
+                <button id="close-chat"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="chat-messages" class="chat-messages">
+                <div class="msg bot">你好！我是 AI精灵，有什么可以帮你的吗？</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="咨询 AI精灵...">
+                <button id="send-chat"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+        <button id="chat-toggle" class="chat-toggle">
+            <i class="fas fa-comment-dots"></i>
+        </button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
